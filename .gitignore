@@ -46,3 +46,6 @@ Thumbs.db
 # Photos de référence : gardées en local uniquement, jamais commitées
 /Reference_Photos/
 /Reference_Videos/
+
+# Captures de contrôle qualité (générées)
+/Screenshots/

@@ -32,7 +32,7 @@ namespace Ennejma.EditorTools
                             new Vector2(Mathf.Max(1f, Mathf.Round(length / height)), 1f), 0.12f, Color.white);
 
         // ---------------------------------------------------------------- Verre et lumière du jour
-        public static Material Vitrail => BuildKit.TexMat("Vitrail_Qamariya", () => Tex.Vitrail, new Vector2(3f, 3f), 0.6f, Color.white, 1.4f);
+        public static Material Vitrail => BuildKit.TexMat("Vitrail_Qamariya", () => Tex.Vitrail, new Vector2(7f, 7f), 0.6f, Color.white, 0.9f);
         public static Material VitreJour => BuildKit.Emissive("Vitre_Jour", new Color(0.8f, 0.88f, 0.95f), new Color(0.75f, 0.85f, 1f) * 1.3f);
         public static Material Voilage => BuildKit.Emissive("Voilage", new Color(0.95f, 0.95f, 0.92f), new Color(1f, 0.98f, 0.92f) * 0.9f);
         public static Material LustreVerre => BuildKit.Emissive("Lustre_Verre", new Color(0.7f, 0.8f, 0.88f), new Color(0.6f, 0.75f, 0.9f) * 0.6f);
@@ -299,12 +299,12 @@ namespace Ennejma.EditorTools
 
         // ================================================================ Mobilier du bit gaâd
         /// <summary>Divan bas à coussins, adossé au mur (dos vers +Z local).</summary>
-        public static void Divan(Transform parent, Vector3 pos, float yaw, float length, float depth = 0.85f)
+        public static void Divan(Transform parent, Vector3 pos, float yaw, float length, float depth = 0.85f, Material velours = null)
         {
             var g = BuildKit.Group("Divan", parent, pos, new Vector3(0f, yaw, 0f));
             BuildKit.Box("Socle", g, new Vector3(0f, 0.18f, 0f), new Vector3(length, 0.36f, depth), Pal.BoisSculpte);
             BuildKit.Box("Facade_Doree", g, new Vector3(0f, 0.2f, -depth * 0.5f - 0.01f), new Vector3(length - 0.1f, 0.2f, 0.02f), Pal.BoisDore, 0f, false);
-            BuildKit.Box("Matelas", g, new Vector3(0f, 0.45f, 0f), new Vector3(length - 0.04f, 0.18f, depth - 0.04f), Pal.Velours, 0f, false);
+            BuildKit.Box("Matelas", g, new Vector3(0f, 0.45f, 0f), new Vector3(length - 0.04f, 0.18f, depth - 0.04f), velours != null ? velours : Pal.Velours, 0f, false);
             int n = Mathf.Max(1, Mathf.RoundToInt((length - 0.4f) / 0.72f));
             float step = (length - 0.4f) / n;
             for (int i = 0; i < n; i++)
@@ -361,7 +361,8 @@ namespace Ennejma.EditorTools
         }
 
         /// <summary>Lustre en disque de verre suspendu à des chaînes. attach = point d'accroche au plafond.</summary>
-        public static void LustreDisque(Transform parent, Vector3 attach, float drop, float radius, float lightIntensity, float lightRange, bool shadows = false)
+        public static void LustreDisque(Transform parent, Vector3 attach, float drop, float radius, float lightIntensity, float lightRange,
+                                        bool shadows = false, Material disque = null)
         {
             var g = BuildKit.Group("Lustre", parent, attach);
             float hook = drop * 0.45f;
@@ -376,7 +377,7 @@ namespace Ennejma.EditorTools
                 BuildKit.Prim(PrimitiveType.Cube, "Chainette", g, (top + bot) * 0.5f, new Vector3(0.015f, d.magnitude, 0.015f),
                               Pal.Laiton, Quaternion.FromToRotation(Vector3.up, d).eulerAngles, false);
             }
-            BuildKit.Cyl("Disque", g, new Vector3(0f, -drop, 0f), radius, 0.06f, Pal.LustreVerre);
+            BuildKit.Cyl("Disque", g, new Vector3(0f, -drop, 0f), radius, 0.06f, disque != null ? disque : Pal.LustreVerre);
             BuildKit.Cyl("Cerclage", g, new Vector3(0f, -drop + 0.03f, 0f), radius + 0.04f, 0.03f, Pal.Laiton);
             BuildKit.PointLight("Lumiere_Lustre", g, new Vector3(0f, -drop - 0.35f, 0f), new Color(1f, 0.85f, 0.65f), lightIntensity, lightRange, shadows);
         }

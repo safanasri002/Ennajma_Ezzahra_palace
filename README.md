@@ -86,20 +86,27 @@ Menu **Ennejma → Phase 1 → Scène 2 - Hall d'entrée** (ou en ligne de comma
 ```
 
 ```
-            SALON NORD « bit gaâd » : divans, plateau de cuivre, vitraux
-   ┌──────────── 3 arcs sur colonnes de marbre rose ────────────┐
-   │ ◄ ESCALIER        GRAND HALL (contrebas)        DESCENTE ◄ VESTIBULE ◄ PORTE (scène 1)
-   │   (vers l'étage)  plafond sculpté à 8,8 m      8 marches roses
-   └──────────── 3 arcs sur colonnes de marbre rose ────────────┘
-            SALON SUD : tables de jeu, chaises lyre, horloge
+                 BAS-CÔTÉ NORD : escalier ▲ (étage), divan rouge, niche de marbre noir
+        ┌──── arcades sur colonnes jumelées de marbre rose ─────────────────────┐
+ BIT    │ porte     GRANDE NEF (2 niveaux)          vasque ◄ rigole ◄  DESCENTE ◄ VESTIBULE ◄ PORTE (scène 1)
+ GAÂD ◄─┤ rosaces   damier rose et blanc, galerie haute, plafond doré  8 marches
+        └──── arcades sur colonnes jumelées de marbre rose ─────────────────────┘
+                 BAS-CÔTÉ SUD : escalier ▲ (étage), divans rouges
 ```
 
-1. **Vestibule** : sol en losanges de marbre, lambris de marbre rose, lanternes.
-2. **Descente** : 8 marches de marbre rose sous des arcs blancs, vers le hall en contrebas.
-3. **Grand hall** : plafond en bois sculpté à caissons, frise de stuc ciselé, vitraux en arc (*qamariya*),
-   lustre, sol de marbre à hexagones ; le **coffre peint et le téléphone de campagne** contre le pilier nord.
-4. **Salon bit gaâd** (nord) et **salon de jeux** (sud), ouverts sur le hall par trois arcs outrepassés.
-5. **Escalier de marbre rose** : on monte vers l'étage (scène 3, à venir). Retour à l'extérieur par la porte du vestibule.
+1. **Vestibule** : porte cloutée vert-de-gris, arc blanc, lanterne de verre suspendue.
+2. **Descente** : 8 marches de marbre rose vers la nef en contrebas.
+3. **Grande nef** : sol en damier rose et blanc, rigole d'eau et **vasque** à veilleuse, arcs outrepassés sur
+   **colonnes jumelées** de marbre rose, murs de **stuc ciselé**, **galerie haute** à balustrades de bois tourné,
+   **plafond de bois doré**, lanterne de bronze.
+4. **Bas-côtés** : lambris d'**onyx rouge**, divans, niche de marbre noir, lampes de bronze, et les **deux escaliers**
+   de marbre rose vers l'étage (scène 3, à venir).
+5. **Au fond** : la porte du **bit gaâd** entre deux rosaces de stuc ; au-dessus, la galerie de **moucharabiehs** rouges.
+   Dans le bit gaâd : divans, plateau de cuivre, lambris de marbre, fenêtre et vitrail en arc.
+
+Les textures de stuc, d'onyx, de marbre noir, du plafond doré et des moucharabiehs sont recadrées depuis des photos
+du palais (`Tools/make_photo_textures.py`). Captures de contrôle : menu **Ennejma → Outils → Captures - Scène 2**
+(images dans `Screenshots/`).
 
 ---
 
