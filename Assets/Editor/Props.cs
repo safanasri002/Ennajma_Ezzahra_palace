@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Ennejma.EditorTools
 {
     /// <summary>Palette de matériaux du palais et de Sidi Bou Saïd.</summary>
-    public static class Pal
+    public static partial class Pal
     {
         public static Material Chaux => BuildKit.Mat("Chaux_Blanche", new Color(0.96f, 0.95f, 0.91f), 0.08f);
         public static Material BleuSBS => BuildKit.Mat("Bleu_SidiBouSaid", new Color(0.05f, 0.36f, 0.68f), 0.35f);

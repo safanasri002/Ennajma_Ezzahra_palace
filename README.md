@@ -78,12 +78,37 @@ Des **panneaux d'information** s'affichent à chaque étape de la visite (`InfoZ
 
 ---
 
+## Scène 2 « Hall d'entrée »
+
+Menu **Ennejma → Phase 1 → Scène 2 - Hall d'entrée** (ou en ligne de commande, Unity fermé) :
+```
+"C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Unity.exe" -batchmode -quit -projectPath . -executeMethod Ennejma.EditorTools.Scene02_HallBuilder.Build -logFile build.log
+```
+
+```
+            SALON NORD « bit gaâd » : divans, plateau de cuivre, vitraux
+   ┌──────────── 3 arcs sur colonnes de marbre rose ────────────┐
+   │ ◄ ESCALIER        GRAND HALL (contrebas)        DESCENTE ◄ VESTIBULE ◄ PORTE (scène 1)
+   │   (vers l'étage)  plafond sculpté à 8,8 m      8 marches roses
+   └──────────── 3 arcs sur colonnes de marbre rose ────────────┘
+            SALON SUD : tables de jeu, chaises lyre, horloge
+```
+
+1. **Vestibule** : sol en losanges de marbre, lambris de marbre rose, lanternes.
+2. **Descente** : 8 marches de marbre rose sous des arcs blancs, vers le hall en contrebas.
+3. **Grand hall** : plafond en bois sculpté à caissons, frise de stuc ciselé, vitraux en arc (*qamariya*),
+   lustre, sol de marbre à hexagones ; le **coffre peint et le téléphone de campagne** contre le pilier nord.
+4. **Salon bit gaâd** (nord) et **salon de jeux** (sud), ouverts sur le hall par trois arcs outrepassés.
+5. **Escalier de marbre rose** : on monte vers l'étage (scène 3, à venir). Retour à l'extérieur par la porte du vestibule.
+
+---
+
 ## Feuille de route (scène par scène)
 
 | # | Scène | Contenu | Phase |
 |---|---|---|---|
 | 1 | `01_Exterieur` | Porte jaune, allée, jardin, vue, esplanade, fontaine, façade | 1 ✅ |
-| 2 | `02_Hall_Entree` | Vestibule, grand hall au plafond très haut sculpté, salons arabesques (*bit gaâd*), départ de l'escalier | 1 + début de la chasse |
+| 2 | `02_Hall_Entree` | Vestibule, grand hall au plafond très haut sculpté, salons arabesques (*bit gaâd*), départ de l'escalier | 1 + début de la chasse ✅ |
 | 3 | `03_Etage_Chambres` | Escalier de marbre, couloir, chambres à coucher (vue jardin / vue Sidi Bou Saïd) | 1 |
 | 4 | `04_Chambre_Baron` | Grande chambre du baron (aile est) | 1 |
 | 5 | `05_Salle_Peintures` | Ses peintures de Sidi Bou Saïd et de Tunis (aile ouest) | 1 |

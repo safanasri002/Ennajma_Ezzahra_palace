@@ -99,6 +99,64 @@ namespace Ennejma.EditorTools
         static void SetIf(Material m, string prop, float v) { if (m.HasProperty(prop)) m.SetFloat(prop, v); }
         static void SetColorIf(Material m, string prop, Color c) { if (m.HasProperty(prop)) m.SetColor(prop, c); }
 
+        // ------------------------------------------------------------------ Textures générées par code
+        public const string TextureFolder = "Assets/Materials/Generated/Textures";
+
+        /// <summary>
+        /// Texture procédurale enregistrée en PNG (créée une seule fois ; changer le nom pour la régénérer).
+        /// f(u, v) reçoit des coordonnées dans [0,1[ et renvoie la couleur du pixel.
+        /// </summary>
+        public static Texture2D ProcTexture(string name, int width, int height, System.Func<float, float, Color> f)
+        {
+            EnsureFolder(TextureFolder);
+            string path = $"{TextureFolder}/{name}.png";
+            var existing = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (existing != null) return existing;
+
+            var tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            var px = new Color[width * height];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                    px[y * width + x] = f((x + 0.5f) / width, (y + 0.5f) / height);
+            tex.SetPixels(px);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            var imp = (TextureImporter)AssetImporter.GetAtPath(path);
+            imp.wrapMode = TextureWrapMode.Repeat;
+            imp.mipmapEnabled = true;
+            imp.anisoLevel = 4;
+            imp.SaveAndReimport();
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        }
+
+        /// <summary>Matériau texturé (répétition = tiling). emission > 0 : la texture sert aussi de lumière émise (vitraux).</summary>
+        public static Material TexMat(string name, System.Func<Texture2D> texture, Vector2 tiling, float smoothness,
+                                      Color tint, float emission = 0f, float metallic = 0f)
+        {
+            if (cache.TryGetValue(name, out var cached) && cached != null) return cached;
+            var tex = texture();
+            var m = Mat(name, tint, smoothness, metallic);
+            m.mainTexture = tex;
+            m.mainTextureScale = tiling;
+            if (m.HasProperty("_BaseMap"))
+            {
+                m.SetTexture("_BaseMap", tex);
+                m.SetTextureScale("_BaseMap", tiling);
+            }
+            if (emission > 0f)
+            {
+                m.EnableKeyword("_EMISSION");
+                m.SetColor("_EmissionColor", Color.white * emission);
+                m.SetTexture("_EmissionMap", tex);
+                m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+            }
+            EditorUtility.SetDirty(m);
+            return m;
+        }
+
         public static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
@@ -250,6 +308,37 @@ namespace Ennejma.EditorTools
             return g;
         }
 
+        /// <summary>
+        /// Escalier droit qui monte vers +Z local depuis start (bas de la première marche, au sol).
+        /// ramp = true : marches sans collider + rampe invisible pour une montée fluide ;
+        /// ramp = false : chaque marche a son collider.
+        /// </summary>
+        public static Transform Stairs(string name, Transform parent, Vector3 start, float yaw, float width,
+                                       int steps, float rise, float tread, Material mat, bool ramp = true)
+        {
+            var g = Group(name, parent, start, new Vector3(0f, yaw, 0f));
+            for (int i = 0; i < steps; i++)
+            {
+                float h = (i + 1) * rise;
+                Box("Marche_" + (i + 1), g, new Vector3(0f, h * 0.5f, (i + 0.5f) * tread),
+                    new Vector3(width, h, tread), mat, 0f, !ramp);
+            }
+            if (!ramp) return g;
+
+            float L = steps * tread, H = steps * rise;
+            float pitch = Mathf.Atan2(H, L) * Mathf.Rad2Deg;
+            const float t = 0.3f;
+            var r = new GameObject("Rampe_Invisible");
+            r.transform.SetParent(g, false);
+            var rot = Quaternion.Euler(-pitch, 0f, 0f);
+            r.transform.localRotation = rot;
+            Vector3 mid = new Vector3(0f, H * 0.5f + rise * 0.5f, L * 0.5f);
+            r.transform.localPosition = mid - rot * Vector3.up * (t * 0.5f);
+            r.AddComponent<BoxCollider>().size = new Vector3(width, t, Mathf.Sqrt(L * L + H * H));
+            r.isStatic = true;
+            return g;
+        }
+
         public static void Studs(Transform parent, Vector3 center, float w, float h, int cols, int rows, float z, Material m, float size = 0.06f)
         {
             for (int i = 0; i < cols; i++)
@@ -392,6 +481,42 @@ namespace Ennejma.EditorTools
             RenderSettings.fogDensity = 0.0018f;
             RenderSettings.fogColor = new Color(0.78f, 0.86f, 0.95f);
             DynamicGI.UpdateEnvironment();
+            return l;
+        }
+
+        public static Light PointLight(string name, Transform parent, Vector3 pos, Color color, float intensity,
+                                       float range, bool shadows = false)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = pos;
+            var l = go.AddComponent<Light>();
+            l.type = LightType.Point;
+            l.color = color;
+            l.intensity = intensity;
+            l.range = range;
+            l.shadows = shadows ? LightShadows.Soft : LightShadows.None;
+            l.lightmapBakeType = LightmapBakeType.Realtime;
+            return l;
+        }
+
+        /// <summary>Éclairage d'intérieur : lumière d'ambiance à trois tons + une lumière diffuse sans ombres.</summary>
+        public static Light SetupInterior(Color sky, Color equator, Color ground, float fillIntensity)
+        {
+            var go = new GameObject("Lumiere_Diffuse");
+            var l = go.AddComponent<Light>();
+            l.type = LightType.Directional;
+            l.color = new Color(1f, 0.93f, 0.82f);
+            l.intensity = fillIntensity;
+            l.shadows = LightShadows.None;
+            go.transform.rotation = Quaternion.Euler(55f, -35f, 0f);
+
+            RenderSettings.sun = l;
+            RenderSettings.ambientMode = AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = sky;
+            RenderSettings.ambientEquatorColor = equator;
+            RenderSettings.ambientGroundColor = ground;
+            RenderSettings.fog = false;
             return l;
         }
 
