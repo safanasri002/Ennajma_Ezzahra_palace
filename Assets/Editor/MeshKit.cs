@@ -124,6 +124,54 @@ namespace Ennejma.EditorTools
             return piers;
         }
 
+        // ------------------------------------------------------------------ Toits et auvents
+        /// <summary>Pyramide (toit en croupe) de base w × d, posée en pos (centre de la base).</summary>
+        public static GameObject Pyramid(string name, Transform parent, Vector3 pos, float w, float d, float h, Material mat, float yaw = 0f)
+        {
+            var b = new MB();
+            var top = new Vector3(0f, h, 0f);
+            var c = new[] { new Vector3(-w / 2, 0, -d / 2), new Vector3(w / 2, 0, -d / 2), new Vector3(w / 2, 0, d / 2), new Vector3(-w / 2, 0, d / 2) };
+            for (int i = 0; i < 4; i++)
+            {
+                Vector3 a = c[i], e = c[(i + 1) % 4];
+                var nrm = Vector3.Cross(e - a, top - a).normalized;
+                if (Vector3.Dot(nrm, (a + e) * 0.5f) < 0f) nrm = -nrm;
+                b.Tri(a, e, top, new Vector2(0, 0), new Vector2(Vector3.Distance(a, e), 0), new Vector2(Vector3.Distance(a, e) * 0.5f, h), nrm);
+            }
+            b.Quad(c[0], c[1], c[2], c[3], Vector2.zero, new Vector2(w, 0), new Vector2(w, d), new Vector2(0, d), Vector3.down);
+            return MeshObject(name, parent, b.Build(name), mat, pos, new Vector3(0f, yaw, 0f));
+        }
+
+        /// <summary>
+        /// Auvent en quart de sphère (demi-coupole) adossé à un mur : base plane horizontale, dos plaqué au mur (z = 0),
+        /// saillie vers -Z local. pos = milieu du bord bas contre le mur. r = rayon, depth = saillie.
+        /// </summary>
+        public static GameObject QuarterDome(string name, Transform parent, Vector3 pos, float r, float depth, Material mat, float yaw = 0f)
+        {
+            var b = new MB();
+            const int nA = 16, nB = 8;
+            Vector3 P(float a, float e) => new Vector3(Mathf.Cos(a) * Mathf.Cos(e) * r, Mathf.Sin(a) * Mathf.Cos(e) * r, -Mathf.Sin(e) * depth);
+            for (int i = 0; i < nA; i++)
+                for (int j = 0; j < nB; j++)
+                {
+                    float a0 = Mathf.PI * i / nA, a1 = Mathf.PI * (i + 1) / nA;
+                    float e0 = Mathf.PI * 0.5f * j / nB, e1 = Mathf.PI * 0.5f * (j + 1) / nB;
+                    Vector3 p0 = P(a0, e0), p1 = P(a1, e0), p2 = P(a1, e1), p3 = P(a0, e1);
+                    var mid = (p0 + p2) * 0.5f;
+                    var nrm = new Vector3(mid.x / (r * r), mid.y / (r * r), mid.z / (depth * depth)).normalized;
+                    b.Quad(p0, p1, p2, p3, new Vector2(a0 * r, e0 * r), new Vector2(a1 * r, e0 * r), new Vector2(a1 * r, e1 * r), new Vector2(a0 * r, e1 * r), nrm);
+                }
+            // Sous-face plane (demi-disque horizontal)
+            for (int i = 0; i < nA; i++)
+            {
+                float a0 = Mathf.PI * i / nA, a1 = Mathf.PI * (i + 1) / nA;
+                var q0 = new Vector3(-Mathf.Cos(a0) * r, 0f, -Mathf.Sin(a0) * depth);
+                var q1 = new Vector3(-Mathf.Cos(a1) * r, 0f, -Mathf.Sin(a1) * depth);
+                b.Tri(Vector3.zero, q0, q1, Vector2.zero, new Vector2(q0.x, q0.z), new Vector2(q1.x, q1.z), Vector3.down);
+            }
+            return MeshObject(name, parent, b.Build(name), mat, pos, new Vector3(0f, yaw, 0f));
+        }
+
         const int Seg = 28;
 
         static Vector3 ArcPoint(float r, float cy, float a, float z) => new Vector3(Mathf.Cos(a) * r, cy + Mathf.Sin(a) * r, z);

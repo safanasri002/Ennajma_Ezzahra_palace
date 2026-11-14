@@ -63,3 +63,25 @@ save(load(86).crop((90, 40, 815, 495)).resize((1024, 640), Image.LANCZOS), "Phot
 p89 = load(89)
 save(mirror_tile(p89.crop((40, 275, 160, 465)), (512, 512)), "Photo_Onyx_Rouge")
 save(mirror_tile(p89.crop((752, 365, 818, 475)), (256, 256)), "Photo_Marbre_Noir")
+
+# ---------------------------------------------------------------- Extérieur (photos de la visite)
+EXT = Path("Reference_Photos")
+
+
+def load_ext(rel):
+    return Image.open(EXT / rel).convert("RGB")
+
+
+# Battant gauche de la porte jaune, vu de face (photo 02) : clous, croissant, médaillons
+p02 = load_ext("01_exterieur_allee_porte/02_porte_jaune_cloutee_arc_stucs.jpg")
+save(p02.crop((50, 300, 318, 1015)).resize((384, 1024), Image.LANCZOS), "Photo_Porte_Jaune")
+# Bandeau de pierre sculptée au-dessus de l'arc du portail (rosaces, cadres emboîtés)
+save(p02.crop((0, 45, 720, 235)).resize((1024, 270), Image.LANCZOS), "Photo_Portail_Bandeau")
+# Montant sculpté du portail (panneaux emboîtés, à droite de l'arc)
+save(p02.crop((570, 560, 690, 1000)).resize((256, 940), Image.LANCZOS), "Photo_Portail_Montant")
+# Dalles de pierre grise de la rue devant le portail
+save(mirror_tile(p02.crop((0, 1060, 720, 1280)), (1024, 512)), "Photo_Dalles_Rue")
+# Bassin des cyprès (photo 10) : frise de zellige vert et jaune, dalles de calcaire
+p10 = load_ext("02_jardin_bassin/10_bassin_cypres.jpg")
+save(mirror_tile_h(p10.crop((20, 848, 700, 879)), (1024, 48)), "Photo_Frise_Zellige_Bassin")
+save(mirror_tile(p10.crop((0, 905, 774, 1032)), (1024, 512)), "Photo_Dalles_Calcaire")
