@@ -172,6 +172,131 @@ namespace Ennejma.EditorTools
             return MeshObject(name, parent, b.Build(name), mat, pos, new Vector3(0f, yaw, 0f));
         }
 
+        /// <summary>
+        /// Grille bombée (fenêtre en fer forgé « en ventre », façade du jardin persan) : panneau de largeur w et hauteur h
+        /// qui se gonfle vers −Z local de « bulge » à mi-hauteur basse. UV en mètres. pos = bas-centre.
+        /// </summary>
+        public static GameObject Bombe(string name, Transform parent, Vector3 pos, float w, float h, float bulge, Material mat, float yaw = 0f)
+        {
+            var b = new MB();
+            const int n = 12;
+            float Z(float t) => -bulge * Mathf.Pow(Mathf.Sin(Mathf.PI * Mathf.Clamp01(t * 1.15f)), 1.3f);
+            float len = 0f;
+            for (int i = 0; i < n; i++)
+            {
+                float t0 = i / (float)n, t1 = (i + 1) / (float)n;
+                var p0 = new Vector3(-w / 2, t0 * h, Z(t0)); var p1 = new Vector3(w / 2, t0 * h, Z(t0));
+                var p2 = new Vector3(w / 2, t1 * h, Z(t1)); var p3 = new Vector3(-w / 2, t1 * h, Z(t1));
+                float seg = Vector3.Distance(p0, p3);
+                var nrm = Vector3.Cross(p1 - p0, p3 - p0).normalized;
+                if (nrm.z > 0f) nrm = -nrm;
+                b.Quad(p0, p1, p2, p3, new Vector2(0, len), new Vector2(w, len), new Vector2(w, len + seg), new Vector2(0, len + seg), nrm);
+                len += seg;
+            }
+            return MeshObject(name, parent, b.Build(name), mat, pos, new Vector3(0f, yaw, 0f));
+        }
+
+        /// <summary>
+        /// Relief lointain (montagne) : grille de hauteurs formée de pics gaussiens (x, z, hauteur, rayon) en coordonnées locales,
+        /// sur un carré de côté « size ». Sert au Bou Kornine (deux cornes) et aux reliefs du cap Bon.
+        /// </summary>
+        public static GameObject Relief(string name, Transform parent, Vector3 pos, float size, Vector4[] peaks, Material mat, int res = 64)
+        {
+            var b = new MB();
+            float H(float x, float z)
+            {
+                float y = 0f;
+                foreach (var p in peaks)
+                {
+                    float d2 = ((x - p.x) * (x - p.x) + (z - p.y) * (z - p.y)) / (p.w * p.w);
+                    y = Mathf.Max(y, p.z * Mathf.Exp(-d2));
+                }
+                return y - 2f;
+            }
+            Vector3 V(int i, int j) { float x = -size / 2 + size * i / res, z = -size / 2 + size * j / res; return new Vector3(x, H(x, z), z); }
+            for (int i = 0; i < res; i++)
+                for (int j = 0; j < res; j++)
+                {
+                    Vector3 a = V(i, j), c = V(i + 1, j), d = V(i + 1, j + 1), e = V(i, j + 1);
+                    var nrm = Vector3.Cross(e - a, c - a).normalized;
+                    if (nrm.y < 0f) nrm = -nrm;
+                    b.Quad(a, c, d, e, new Vector2(a.x, a.z), new Vector2(c.x, c.z), new Vector2(d.x, d.z), new Vector2(e.x, e.z), nrm);
+                }
+            var go = MeshObject(name, parent, b.Build(name), mat, pos, Vector3.zero);
+            go.GetComponent<MeshFilter>().sharedMesh.RecalculateNormals();
+            return go;
+        }
+
+        /// <summary>Terrain continu (grille de hauteurs h(x, z) en coordonnées monde), UV en mètres.</summary>
+        public static GameObject Terrain(string name, Transform parent, Vector2 min, Vector2 max, int res, System.Func<float, float, float> h, Material mat)
+        {
+            var b = new MB();
+            Vector3 V(int i, int j) { float x = Mathf.Lerp(min.x, max.x, i / (float)res), z = Mathf.Lerp(min.y, max.y, j / (float)res); return new Vector3(x, h(x, z), z); }
+            for (int i = 0; i < res; i++)
+                for (int j = 0; j < res; j++)
+                {
+                    Vector3 a = V(i, j), c = V(i + 1, j), d = V(i + 1, j + 1), e = V(i, j + 1);
+                    var nrm = Vector3.Cross(e - a, c - a).normalized;
+                    if (nrm.y < 0f) nrm = -nrm;
+                    b.Quad(a, c, d, e, new Vector2(a.x, a.z), new Vector2(c.x, c.z), new Vector2(d.x, d.z), new Vector2(e.x, e.z), nrm);
+                }
+            return MeshObject(name, parent, b.Build(name), mat, Vector3.zero, Vector3.zero);
+        }
+
+        // ------------------------------------------------------------------ Végétation : cartes de feuillage
+        /// <summary>
+        /// Bouquets de feuillage : pour chaque point, trois cartes croisées (texture ajourée de feuilles) de taille sizes[i].
+        /// Les normales partent du centre de la couronne (éclairage doux et volumique). Un seul maillage par couronne.
+        /// </summary>
+        public static GameObject Cards(string name, Transform parent, Vector3 pos, Vector3[] pts, float[] sizes, Vector3 center, Material mat)
+        {
+            var b = new MB();
+            for (int i = 0; i < pts.Length; i++)
+            {
+                Vector3 p = pts[i];
+                float s = sizes[i] * 0.5f;
+                float yaw = BuildKit.R(0f, 180f), tilt = BuildKit.R(-20f, 20f);
+                Vector3 d = p - center;
+                Vector3 nrm = (d.sqrMagnitude < 1e-4f ? Vector3.up : d.normalized) + Vector3.up * 0.35f;
+                nrm.Normalize();
+                bool flip = BuildKit.Chance(0.5f);
+                for (int k = 0; k < 3; k++)
+                {
+                    var rot = Quaternion.Euler(tilt, yaw + k * 60f, BuildKit.R(-12f, 12f));
+                    Vector3 ax = rot * Vector3.right * s, ay = rot * Vector3.up * s;
+                    float u0 = flip ? 1f : 0f, u1 = 1f - u0;
+                    b.Quad(p - ax - ay, p + ax - ay, p + ax + ay, p - ax + ay,
+                           new Vector2(u0, 0f), new Vector2(u1, 0f), new Vector2(u1, 1f), new Vector2(u0, 1f), nrm);
+                }
+            }
+            return MeshObject(name, parent, b.Build(name), mat, pos, Vector3.zero);
+        }
+
+        /// <summary>Palmes arquées (palmiers) : n palmes de longueur len, en 5 segments qui montent puis retombent. pos = cœur de la couronne.</summary>
+        public static GameObject Fronds(string name, Transform parent, Vector3 pos, int n, float len, float width, Material mat)
+        {
+            var b = new MB();
+            for (int i = 0; i < n; i++)
+            {
+                float a = (i * 360f / n + BuildKit.R(-8f, 8f)) * Mathf.Deg2Rad;
+                float lift = BuildKit.R(0.1f, 0.6f), droop = BuildKit.R(0.5f, 0.9f);
+                float l = len * BuildKit.R(0.8f, 1.1f);
+                var dir = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                var side = new Vector3(-dir.z, 0f, dir.x);
+                Vector3 P(float t) => dir * (l * t) + Vector3.up * (l * (lift * t - droop * t * t));
+                const int seg = 5;
+                for (int k = 0; k < seg; k++)
+                {
+                    float t0 = k / (float)seg, t1 = (k + 1) / (float)seg;
+                    float w0 = width * (1f - 0.6f * t0) * 0.5f, w1 = width * (1f - 0.6f * t1) * 0.5f;
+                    Vector3 a0 = P(t0) - side * w0, b0 = P(t0) + side * w0, a1 = P(t1) - side * w1, b1 = P(t1) + side * w1;
+                    var nrm = (Vector3.Cross(b0 - a0, a1 - a0).normalized * 0.4f + Vector3.up).normalized;
+                    b.Quad(a0, b0, b1, a1, new Vector2(t0, 0f), new Vector2(t0, 1f), new Vector2(t1, 1f), new Vector2(t1, 0f), nrm);
+                }
+            }
+            return MeshObject(name, parent, b.Build(name), mat, pos, Vector3.zero);
+        }
+
         const int Seg = 28;
 
         static Vector3 ArcPoint(float r, float cy, float a, float z) => new Vector3(Mathf.Cos(a) * r, cy + Mathf.Sin(a) * r, z);

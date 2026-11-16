@@ -85,3 +85,11 @@ save(mirror_tile(p02.crop((0, 1060, 720, 1280)), (1024, 512)), "Photo_Dalles_Rue
 p10 = load_ext("02_jardin_bassin/10_bassin_cypres.jpg")
 save(mirror_tile_h(p10.crop((20, 848, 700, 879)), (1024, 48)), "Photo_Frise_Zellige_Bassin")
 save(mirror_tile(p10.crop((0, 905, 774, 1032)), (1024, 512)), "Photo_Dalles_Calcaire")
+
+# ---------------------------------------------------------------- Extérieur, compléments (Reference_Photos/21_exterieur_complements)
+C21 = "21_exterieur_complements/"
+# Panneaux de faïence du fond du kiosque (photo 130), entre les deux colonnes
+p130 = load_ext(C21 + "130.jpg")
+save(mirror_tile_h(p130.crop((212, 198, 490, 398)), (1024, 384)), "Photo_Faience_Kiosque")
+# Porte bleue en fer forgé ajouré sous l'auvent du jardin persan (photo 144, de face)
+save(load_ext(C21 + "144.jpg").crop((521, 196, 654, 426)).resize((300, 520), Image.LANCZOS), "Photo_Porte_Bleue_Fer")

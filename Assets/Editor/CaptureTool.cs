@@ -45,10 +45,14 @@ namespace Ennejma.EditorTools
             new Pose("05_esplanade_panorama", new Vector3(-12f, 1.65f, 86f), new Vector3(3f, 80f, 0f)),
             new Pose("06_coin_fontaine", new Vector3(-42f, 1.65f, 45f), new Vector3(4f, -55f, 0f)),
             new Pose("07_skifa", new Vector3(0f, 1.65f, -1.5f), new Vector3(0f, 0f, 0f)),
-            new Pose("08_bassin_cypres", new Vector3(-5.5f, 1.65f, 28f), new Vector3(3f, -90f, 0f)),
-            new Pose("09_vue_sud_bou_kornine", new Vector3(3.2f, 1.65f, 60f), new Vector3(4f, 168f, 0f)),
+            new Pose("08_bassin_cypres", new Vector3(-7.4f, 1.65f, 28f), new Vector3(3f, -90f, 0f)),
+            new Pose("09_vue_sud_bou_kornine", new Vector3(3.6f, 1.65f, 57f), new Vector3(2f, 150f, 0f)),
             new Pose("10_galerie_arcades", new Vector3(-37.6f, 1.8f, 62f), new Vector3(0f, 0f, 0f)),
             new Pose("11_jardin_persan_porte", new Vector3(-49f, 1.65f, 46f), new Vector3(-2f, 0f, 0f)),
+            new Pose("12_bassin_vers_pavillon", new Vector3(-50f, 1.65f, 28f), new Vector3(3f, 90f, 0f)),
+            new Pose("13_facade_en_biais", new Vector3(-12f, 1.65f, 62f), new Vector3(-8f, -62f, 0f)),
+            new Pose("14_kiosque_escalier", new Vector3(-46f, 1.65f, 47f), new Vector3(0f, -55f, 0f)),
+            new Pose("15_porte_cote_rue", new Vector3(0f, 1.65f, -6.5f), new Vector3(-6f, 0f, 0f)),
         };
 
         public static void Capture(string scenePath, string prefix, Pose[] poses)

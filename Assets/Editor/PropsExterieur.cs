@@ -23,9 +23,9 @@ namespace Ennejma.EditorTools
         public static Material Sable => BuildKit.Mat("Sable_Plage", new Color(0.78f, 0.7f, 0.55f), 0.05f);
         public static Material Maquis => BuildKit.Mat("Maquis_Pente", new Color(0.24f, 0.29f, 0.17f), 0.04f);
         public static Material FeuillageMaquis => BuildKit.Mat("Feuillage_Maquis", new Color(0.2f, 0.3f, 0.15f), 0.05f);
-        public static Material EcorceEucalyptus => BuildKit.Mat("Ecorce_Eucalyptus", new Color(0.62f, 0.58f, 0.5f), 0.12f);
+        public static Material EcorceEucalyptus => BuildKit.Mat("Ecorce_Eucalyptus", new Color(0.72f, 0.69f, 0.62f), 0.12f);
         public static Material FeuillageEucalyptus => BuildKit.Mat("Feuillage_Eucalyptus", new Color(0.36f, 0.45f, 0.31f), 0.1f);
-        public static Material TroncCypres => BuildKit.Mat("Tronc_Cypres", new Color(0.4f, 0.33f, 0.26f), 0.05f);
+        public static Material TroncCypres => BuildKit.Mat("Tronc_Cypres", new Color(0.33f, 0.29f, 0.25f), 0.05f);
         public static Material Agave => BuildKit.Mat("Agave", new Color(0.42f, 0.53f, 0.48f), 0.25f);
         public static Material Geranium => BuildKit.Mat("Geranium_Feuilles", new Color(0.22f, 0.4f, 0.17f), 0.1f);
         public static Material BrancheNue => BuildKit.Mat("Branche_Nue", new Color(0.3f, 0.26f, 0.22f), 0.05f);
@@ -107,23 +107,23 @@ namespace Ennejma.EditorTools
             var lean = new Vector3(BuildKit.R(-5f, 5f), 0f, BuildKit.R(-5f, 5f));
             if (tetard)
             {
+                // Têtard : tronc pâle étêté, repousses courtes en boules de feuillage (photos 12, 21, 147)
                 float h = height * 0.55f;
-                BuildKit.Cyl("Tronc", g, new Vector3(0f, h * 0.5f, 0f), 0.2f, h, Pal.EcorceEucalyptus, lean, true);
+                BuildKit.Cyl("Tronc", g, new Vector3(0f, h * 0.5f, 0f), 0.22f, h, Pal.EcorceEucalyptus, lean, true);
                 int n = BuildKit.RI(4, 7);
                 for (int i = 0; i < n; i++)
                 {
                     float a = i * Mathf.PI * 2f / n + BuildKit.R(-0.3f, 0.3f);
-                    var top = new Vector3(Mathf.Cos(a) * BuildKit.R(0.5f, 1.2f), h + BuildKit.R(0.6f, height * 0.4f), Mathf.Sin(a) * BuildKit.R(0.5f, 1.2f));
-                    var mid = (top + new Vector3(0f, h, 0f)) * 0.5f;
+                    var top = new Vector3(Mathf.Cos(a) * BuildKit.R(0.4f, 1.0f), h + BuildKit.R(0.6f, height * 0.4f), Mathf.Sin(a) * BuildKit.R(0.4f, 1.0f));
                     var d = top - new Vector3(0f, h, 0f);
-                    var rot = Quaternion.FromToRotation(Vector3.up, d.normalized).eulerAngles;
-                    BuildKit.Cyl("Repousse", g, mid, 0.07f, d.magnitude, Pal.EcorceEucalyptus, rot);
-                    float s = BuildKit.R(1.1f, 1.8f);
-                    BuildKit.Sph("Boule", g, top, new Vector3(s, s * 0.9f, s), Pal.FeuillageEucalyptus);
+                    BuildKit.Cyl("Repousse", g, new Vector3(0f, h, 0f) + d * 0.5f, 0.06f, d.magnitude, Pal.EcorceEucalyptus, Quaternion.FromToRotation(Vector3.up, d.normalized).eulerAngles);
+                    float s = BuildKit.R(0.6f, 0.95f);
+                    Veg.Couronne(g, top, new Vector3(s, s * 0.9f, s), 9, 1.0f, Pal.CarteEucalyptus, Pal.CoeurEucalyptus, 0.55f);
                 }
                 return;
             }
-            BuildKit.Cyl("Tronc", g, new Vector3(0f, height * 0.3f, 0f), BuildKit.R(0.14f, 0.2f), height * 0.6f, Pal.EcorceEucalyptus, lean, true);
+            // Port libre : grandes branches obliques et feuillage aéré qui retombe (photos 01, 32, 138)
+            BuildKit.Cyl("Tronc", g, new Vector3(0f, height * 0.3f, 0f), BuildKit.R(0.16f, 0.24f), height * 0.6f, Pal.EcorceEucalyptus, lean, true);
             int b = BuildKit.RI(3, 5);
             for (int i = 0; i < b; i++)
             {
@@ -131,15 +131,9 @@ namespace Ennejma.EditorTools
                 var start = new Vector3(0f, height * BuildKit.R(0.45f, 0.6f), 0f);
                 var end = start + new Vector3(Mathf.Cos(a) * BuildKit.R(2f, 4f), height * BuildKit.R(0.25f, 0.4f), Mathf.Sin(a) * BuildKit.R(2f, 4f));
                 var d = end - start;
-                BuildKit.Cyl("Branche", g, (start + end) * 0.5f, 0.07f, d.magnitude, Pal.EcorceEucalyptus,
-                             Quaternion.FromToRotation(Vector3.up, d.normalized).eulerAngles);
-                int k = BuildKit.RI(2, 4);
-                for (int j = 0; j < k; j++)
-                {
-                    float s = BuildKit.R(2f, 3.4f);
-                    BuildKit.Sph("Feuillage", g, end + new Vector3(BuildKit.R(-1f, 1f), BuildKit.R(-0.4f, 0.8f), BuildKit.R(-1f, 1f)),
-                                 new Vector3(s, s * 0.6f, s), Pal.FeuillageEucalyptus);
-                }
+                BuildKit.Cyl("Branche", g, (start + end) * 0.5f, 0.08f, d.magnitude, Pal.EcorceEucalyptus, Quaternion.FromToRotation(Vector3.up, d.normalized).eulerAngles);
+                float s = BuildKit.R(1.8f, 2.6f);
+                Veg.Couronne(g, end, new Vector3(s, s * 0.6f, s), 16, 1.8f, Pal.CarteEucalyptus, Pal.CoeurEucalyptus, 0.45f);
             }
         }
 
@@ -148,17 +142,11 @@ namespace Ennejma.EditorTools
         {
             var g = BuildKit.Group("Cypres_Ancien", parent, pos);
             float r = BuildKit.R(0.9f, 1.3f);
-            float bottom = BuildKit.R(1.6f, 2.6f);
+            float bottom = BuildKit.R(3f, 5.5f);   // troncs nus visibles sur 3 à 5 m (photos 10, 121, 157)
             BuildKit.Cyl("Tronc", g, new Vector3(0f, bottom * 0.5f + 0.2f, 0f), 0.22f, bottom + 0.4f, Pal.TroncCypres, Vector3.zero, true);
             float body = height - bottom;
-            BuildKit.Cap("Flamme", g, new Vector3(0f, bottom + body * 0.5f, 0f), r, body, Pal.Cypres, false);
-            for (int i = 0; i < 4; i++)
-            {
-                float y = bottom + body * BuildKit.R(0.15f, 0.75f);
-                float s = r * BuildKit.R(0.9f, 1.3f);
-                BuildKit.Sph("Touffe", g, new Vector3(BuildKit.R(-0.4f, 0.4f) * r, y, BuildKit.R(-0.4f, 0.4f) * r),
-                             new Vector3(s * 1.6f, s * 2.4f, s * 1.6f), Pal.Cypres);
-            }
+            BuildKit.Cap("Coeur", g, new Vector3(0f, bottom + body * 0.5f, 0f), r * 0.7f, body * 0.92f, Pal.CoeurCypres, false);
+            Veg.Couronne(g, new Vector3(0f, bottom + body * 0.5f, 0f), new Vector3(r, body * 0.5f, r), Mathf.RoundToInt(body * 3.2f), 1.4f, Pal.CarteCypres, null);
         }
 
         /// <summary>Agave : rosette de feuilles épaisses gris-bleu.</summary>
@@ -177,13 +165,8 @@ namespace Ennejma.EditorTools
         public static void Arbuste(Transform parent, Vector3 pos, float size, Material m = null)
         {
             var g = BuildKit.Group("Arbuste", parent, pos);
-            int n = BuildKit.RI(2, 4);
-            for (int i = 0; i < n; i++)
-            {
-                float s = size * BuildKit.R(0.7f, 1.1f);
-                BuildKit.Sph("Touffe", g, new Vector3(BuildKit.R(-0.4f, 0.4f) * size, s * 0.4f, BuildKit.R(-0.4f, 0.4f) * size),
-                             new Vector3(s, s * 0.8f, s), m != null ? m : Pal.FeuillageMaquis);
-            }
+            var feuilles = m == Pal.Haie ? Pal.CarteMaquis : Pal.CarteMaquis;
+            Veg.Couronne(g, new Vector3(0f, size * 0.42f, 0f), new Vector3(size * 0.55f, size * 0.42f, size * 0.55f), Mathf.Max(6, Mathf.RoundToInt(size * 7f)), Mathf.Max(0.6f, size * 0.55f), feuilles, Pal.CoeurSombre);
         }
 
         /// <summary>Jeune bigaradier (oranger amer) des carrés du jardin persan.</summary>
@@ -191,8 +174,7 @@ namespace Ennejma.EditorTools
         {
             var g = BuildKit.Group("Bigaradier", parent, pos);
             BuildKit.Cyl("Tronc", g, new Vector3(0f, 0.6f, 0f), 0.05f, 1.2f, Pal.Tronc);
-            BuildKit.Sph("Couronne", g, new Vector3(0f, 1.6f, 0f), new Vector3(1.0f, 1.2f, 1.0f), Pal.Feuillage);
-            BuildKit.Sph("Couronne_2", g, new Vector3(0.2f, 2.0f, 0.1f), new Vector3(0.7f, 0.8f, 0.7f), Pal.Feuillage);
+            Veg.Couronne(g, new Vector3(0f, 1.7f, 0f), new Vector3(0.6f, 0.7f, 0.6f), 16, 0.75f, Pal.CarteBigaradier, null);
         }
 
         /// <summary>Arbre caduc dénudé (photos d'hiver 28 à 35) : tronc et branches sans feuilles.</summary>
@@ -268,103 +250,6 @@ namespace Ennejma.EditorTools
         }
 
         // ================================================================ Jardin persan
-        /// <summary>
-        /// Carré de plantation (photos 36 à 39) : bordure de pierre, terre, grille basse en fer forgé bleu
-        /// à pommeaux, jeune bigaradier et touffes de géraniums.
-        /// </summary>
-        public static void CarreJardin(Transform parent, Vector3 center, float size, bool arbre = true)
-        {
-            var g = BuildKit.Group("Carre_Plantation", parent, center);
-            float h = size * 0.5f;
-            for (int s = -1; s <= 1; s += 2)
-            {
-                BuildKit.Box("Bordure", g, new Vector3(s * (h - 0.1f), 0.13f, 0f), new Vector3(0.2f, 0.26f, size), Pal.Marbre);
-                BuildKit.Box("Bordure", g, new Vector3(0f, 0.13f, s * (h - 0.1f)), new Vector3(size - 0.4f, 0.26f, 0.2f), Pal.Marbre);
-            }
-            BuildKit.Box("Terre", g, new Vector3(0f, 0.12f, 0f), new Vector3(size - 0.4f, 0.24f, size - 0.4f), Pal.Terre, 0f, false);
-
-            // Grille : poteaux à pommeaux tous les ≈ 0,35 m, deux lisses
-            float gh = 0.45f, e = h - 0.1f;
-            for (int side = 0; side < 4; side++)
-            {
-                var rot = Quaternion.Euler(0f, side * 90f, 0f);
-                Vector3 p0 = rot * new Vector3(-e, 0f, -e), p1 = rot * new Vector3(e, 0f, -e);
-                int n = Mathf.RoundToInt(2f * e / 0.35f);
-                for (int k = 0; k < n; k++)
-                {
-                    var p = Vector3.Lerp(p0, p1, k / (float)n) + Vector3.up * 0.26f;
-                    BuildKit.Box("Poteau", g, p + Vector3.up * gh * 0.5f, new Vector3(0.025f, gh, 0.025f), Pal.BleuFer, 0f, false);
-                    BuildKit.Sph("Pommeau", g, p + Vector3.up * (gh + 0.03f), Vector3.one * 0.07f, Pal.BleuFer);
-                }
-                var mid = (p0 + p1) * 0.5f + Vector3.up * 0.26f;
-                BuildKit.Box("Lisse", g, mid + Vector3.up * (gh - 0.04f), (rot * new Vector3(2f * e, 0.025f, 0.025f)).Abs() + new Vector3(0.025f, 0f, 0.025f), Pal.BleuFer, 0f, false);
-                BuildKit.Box("Lisse_Basse", g, mid + Vector3.up * 0.08f, (rot * new Vector3(2f * e, 0.025f, 0.025f)).Abs() + new Vector3(0.025f, 0f, 0.025f), Pal.BleuFer, 0f, false);
-            }
-            if (arbre) Bigaradier(g, new Vector3(BuildKit.R(-0.3f, 0.3f), 0.24f, BuildKit.R(-0.3f, 0.3f)));
-            int tufts = Mathf.RoundToInt(size * size * 1.2f);
-            for (int i = 0; i < tufts; i++)
-            {
-                float s = BuildKit.R(0.35f, 0.6f);
-                BuildKit.Sph("Geranium", g, new Vector3(BuildKit.R(-e + 0.3f, e - 0.3f), 0.3f, BuildKit.R(-e + 0.3f, e - 0.3f)),
-                             new Vector3(s, s * 0.55f, s), Pal.Geranium);
-            }
-        }
-
-        /// <summary>Vasque de grès ocre sur fût (photos 36, 37), dans un petit bassin carré au ras du sol.</summary>
-        public static void VasqueGres(Transform parent, Vector3 pos)
-        {
-            var g = BuildKit.Group("Vasque_Gres", parent, pos);
-            for (int s = -1; s <= 1; s += 2)
-            {
-                BuildKit.Box("Margelle", g, new Vector3(s * 0.75f, 0.08f, 0f), new Vector3(0.12f, 0.16f, 1.62f), Pal.Marbre);
-                BuildKit.Box("Margelle", g, new Vector3(0f, 0.08f, s * 0.75f), new Vector3(1.38f, 0.16f, 0.12f), Pal.Marbre);
-            }
-            BuildKit.Box("Eau_Bassin", g, new Vector3(0f, 0.1f, 0f), new Vector3(1.4f, 0.02f, 1.4f), Pal.Eau, 0f, false);
-            BuildKit.Cyl("Socle", g, new Vector3(0f, 0.18f, 0f), 0.26f, 0.16f, Pal.Gres, Vector3.zero, true);
-            BuildKit.Cyl("Fut", g, new Vector3(0f, 0.55f, 0f), 0.12f, 0.6f, Pal.Gres);
-            BuildKit.Cyl("Bague", g, new Vector3(0f, 0.6f, 0f), 0.16f, 0.06f, Pal.Gres);
-            BuildKit.Cyl("Coupe", g, new Vector3(0f, 0.9f, 0f), 0.36f, 0.12f, Pal.Gres);
-            BuildKit.Cyl("Coupe_Pied", g, new Vector3(0f, 0.83f, 0f), 0.22f, 0.06f, Pal.Gres);
-            BuildKit.Cyl("Eau_Coupe", g, new Vector3(0f, 0.96f, 0f), 0.31f, 0.01f, Pal.Eau);
-            BuildKit.Sph("Bouton", g, new Vector3(0f, 1.02f, 0f), Vector3.one * 0.08f, Pal.Gres);
-        }
-
-        /// <summary>
-        /// Porte bleue sous auvent demi-cercle (photos 33, 37, 45) : battants bleus, deux colonnes de marbre,
-        /// auvent en demi-coupole bleu à ajour central, marche, deux lions de marbre. pos = au pied du mur, face vers -Z local.
-        /// </summary>
-        public static void PorteBleueAuvent(Transform parent, Vector3 pos, float yaw)
-        {
-            var g = BuildKit.Group("Porte_Bleue_Auvent", parent, pos, new Vector3(0f, yaw, 0f));
-            BuildKit.Box("Marche", g, new Vector3(0f, 0.08f, -0.5f), new Vector3(3.4f, 0.16f, 1.0f), Pal.Marbre);
-            BuildKit.Box("Encadrement", g, new Vector3(0f, 1.35f, -0.03f), new Vector3(1.8f, 2.7f, 0.06f), Pal.Marbre, 0f, false);
-            BuildKit.Box("Porte", g, new Vector3(0f, 1.36f, -0.07f), new Vector3(1.4f, 2.4f, 0.06f), Pal.BleuBois, 0f, false);
-            for (int s = -1; s <= 1; s += 2)
-                for (int k = 0; k < 3; k++)
-                    BuildKit.Box("Panneau", g, new Vector3(s * 0.36f, 0.6f + k * 0.72f, -0.11f), new Vector3(0.52f, 0.6f, 0.03f), Pal.BleuBois, 0f, false);
-            BuildKit.Box("Jointure", g, new Vector3(0f, 1.36f, -0.11f), new Vector3(0.03f, 2.4f, 0.03f), Pal.Fer, 0f, false);
-
-            // Colonnes de marbre portant l'auvent
-            for (int s = -1; s <= 1; s += 2)
-            {
-                BuildKit.Box("Base", g, new Vector3(s * 1.5f, 0.24f, -0.75f), new Vector3(0.3f, 0.16f, 0.3f), Pal.Marbre, 0f, false);
-                BuildKit.Cyl("Colonne", g, new Vector3(s * 1.5f, 1.55f, -0.75f), 0.1f, 2.5f, Pal.Marbre, Vector3.zero, true);
-                BuildKit.Box("Chapiteau", g, new Vector3(s * 1.5f, 2.86f, -0.75f), new Vector3(0.28f, 0.14f, 0.28f), Pal.Marbre, 0f, false);
-                Lion(g, new Vector3(s * 1.15f, 0.16f, -1.2f), s * 15f);
-            }
-            // Auvent : demi-coupole bleue, ajour en treillis au centre (vitre sombre derrière des lattes)
-            var hood = BuildKit.Group("Auvent", g, new Vector3(0f, 2.93f, 0f));
-            MeshKit.QuarterDome("Demi_Coupole", hood, Vector3.zero, 1.65f, 0.95f, Pal.BleuBois);
-            BuildKit.Box("Bord", hood, new Vector3(0f, 0.03f, -0.48f), new Vector3(3.3f, 0.06f, 0.96f), Pal.BleuBois, 0f, false);
-            var lattice = BuildKit.Group("Ajour", hood, new Vector3(0f, 0.75f, -0.82f), new Vector3(-35f, 0f, 0f));
-            BuildKit.Box("Fond", lattice, Vector3.zero, new Vector3(0.9f, 0.6f, 0.02f), Pal.VitreSombre, 0f, false);
-            for (int i = -3; i <= 3; i++)
-            {
-                BuildKit.Box("Latte", lattice, new Vector3(i * 0.12f, 0f, -0.02f), new Vector3(0.025f, 0.6f, 0.02f), Pal.BleuBois, 0f, false);
-                BuildKit.Box("Latte", lattice, new Vector3(0f, i * 0.09f, -0.03f), new Vector3(0.9f, 0.025f, 0.02f), Pal.BleuBois, 0f, false);
-            }
-        }
-
         /// <summary>Petit lion couché en marbre blanc, sur socle (photos 36, 45).</summary>
         public static void Lion(Transform parent, Vector3 pos, float yaw)
         {
@@ -375,23 +260,6 @@ namespace Ennejma.EditorTools
             BuildKit.Sph("Museau", g, new Vector3(0f, 0.56f, -0.31f), new Vector3(0.14f, 0.12f, 0.12f), Pal.Marbre);
             for (int s = -1; s <= 1; s += 2)
                 BuildKit.Box("Patte", g, new Vector3(s * 0.08f, 0.29f, -0.26f), new Vector3(0.07f, 0.1f, 0.18f), Pal.Marbre, 0f, false);
-        }
-
-        /// <summary>Kiosque à auvent de tuiles vertes vernissées (photos 39, W71, W82, W92). Face vers -Z local.</summary>
-        public static void Kiosque(Transform parent, Vector3 pos, float yaw)
-        {
-            var g = BuildKit.Group("Kiosque", parent, pos, new Vector3(0f, yaw, 0f));
-            BuildKit.Box("Sol", g, new Vector3(0f, 0.1f, 0.6f), new Vector3(4.4f, 0.2f, 2.6f), Pal.Marbre);
-            BuildKit.Box("Fond", g, new Vector3(0f, 1.6f, 1.85f), new Vector3(4.4f, 3.2f, 0.3f), Pal.Chaux);
-            BuildKit.Box("Lambris_Faience", g, new Vector3(0f, 0.95f, 1.68f), new Vector3(3.6f, 1.5f, 0.03f), Pal.CarreauTurquoise, 0f, false);
-            for (int s = -1; s <= 1; s += 2)
-            {
-                BuildKit.Box("Joue", g, new Vector3(s * 2.05f, 1.6f, 0.6f), new Vector3(0.3f, 3.2f, 2.6f), Pal.Chaux);
-                BuildKit.Cyl("Colonne", g, new Vector3(s * 1.3f, 1.4f, -0.5f), 0.1f, 2.4f, Pal.Marbre, Vector3.zero, true);
-            }
-            BuildKit.Box("Linteau_Bleu", g, new Vector3(0f, 2.75f, -0.5f), new Vector3(4.4f, 0.3f, 0.2f), Pal.BleuBois, 0f, false);
-            BuildKit.Box("Plafond", g, new Vector3(0f, 2.95f, 0.6f), new Vector3(4.4f, 0.1f, 2.6f), Pal.BleuBois, 0f, false);
-            MeshKit.Pyramid("Toit_Tuiles_Vertes", g, new Vector3(0f, 3.0f, 0.55f), 5.0f, 3.4f, 1.2f, Pal.TuileVerte);
         }
 
         // ================================================================ Façades
